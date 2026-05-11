@@ -21,33 +21,30 @@ export async function POST(request: Request) {
 
     if (!buyer) return new NextResponse("Buyer not found", { status: 404 });
 
-    const review = await prisma.$transaction(async (tx: any) => {
-      const rev = await tx.review.create({
-        data: {
-          ...validatedData,
-          buyerId: buyer.id,
-        }
-      });
-
-      // Update vendor rating
-      const allReviews = await tx.review.findMany({
-        where: { vendorId: validatedData.vendorId }
-      });
-
-      const avgRating = allReviews.reduce((acc: number, curr: any) => acc + curr.rating, 0) / allReviews.length;
-
-      await tx.vendor.update({
-        where: { id: validatedData.vendorId },
-        data: {
-          rating: avgRating,
-          reviewCount: allReviews.length
-        }
-      });
-
-      return rev;
+    // Use separate queries instead of $transaction with typed tx
+    const rev = await prisma.review.create({
+      data: {
+        ...validatedData,
+        buyerId: buyer.id,
+      }
     });
 
-    return NextResponse.json(review);
+    // Update vendor rating
+    const allReviews = await prisma.review.findMany({
+      where: { vendorId: validatedData.vendorId }
+    });
+
+    const avgRating = allReviews.reduce((acc: number, curr: any) => acc + curr.rating, 0) / allReviews.length;
+
+    await prisma.vendor.update({
+      where: { id: validatedData.vendorId },
+      data: {
+        rating: avgRating,
+        reviewCount: allReviews.length
+      }
+    });
+
+    return NextResponse.json(rev);
   } catch (error) {
     if (error instanceof Error) {
       return new NextResponse(error.message, { status: 400 });
