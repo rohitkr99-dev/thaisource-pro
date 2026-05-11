@@ -11,9 +11,25 @@ export interface ButtonProps
   isLoading?: boolean;
 }
 
+// Props that conflict between React and Framer Motion
+const MOTION_EXCLUDES = [
+  'onAnimationStart', 'onAnimationEnd', 'onAnimationIteration',
+  'onDrag', 'onDragStart', 'onDragEnd', 'onDragOver', 'onDragEnter', 'onDragLeave', 'onDrop',
+  'onTransitionEnd',
+] as const;
+
+type ExcludedProp = typeof MOTION_EXCLUDES[number];
+
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant = "primary", size = "md", isLoading, children, ...props }, ref) => {
-    const { onDrag, onDragStart, onDragEnd, onDragOver, onDragEnter, onDragLeave, onDrop, ...restProps } = props;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const filteredProps: Record<string, any> = {};
+    for (const [key, value] of Object.entries(props)) {
+      if (!MOTION_EXCLUDES.includes(key as ExcludedProp)) {
+        filteredProps[key] = value;
+      }
+    }
+
     const variants = {
       primary: "bg-accent text-white hover:bg-accent/90 accent-glow",
       secondary: "bg-secondary text-white hover:bg-secondary/90 secondary-glow",
@@ -42,7 +58,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
           sizes[size],
           className
         )}
-        {...restProps}
+        {...filteredProps}
       >
         {isLoading ? (
           <div className="flex items-center gap-2">

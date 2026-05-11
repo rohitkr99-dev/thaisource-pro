@@ -10,9 +10,25 @@ interface GlassCardProps extends React.HTMLAttributes<HTMLDivElement> {
   gradient?: boolean;
 }
 
+// Props that conflict between React and Framer Motion
+const MOTION_EXCLUDES = [
+  'onAnimationStart', 'onAnimationEnd', 'onAnimationIteration',
+  'onDrag', 'onDragStart', 'onDragEnd', 'onDragOver', 'onDragEnter', 'onDragLeave', 'onDrop',
+  'onTransitionEnd',
+] as const;
+
+type ExcludedProp = typeof MOTION_EXCLUDES[number];
+
 const GlassCard = React.forwardRef<HTMLDivElement, GlassCardProps>(
   ({ className, hoverEffect = true, accent = "none", gradient = false, children, ...props }, ref) => {
-    const { onDrag, onDragStart, onDragEnd, onDragOver, onDragEnter, onDragLeave, onDrop, ...restProps } = props;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const filteredProps: Record<string, any> = {};
+    for (const [key, value] of Object.entries(props)) {
+      if (!MOTION_EXCLUDES.includes(key as ExcludedProp)) {
+        filteredProps[key] = value;
+      }
+    }
+
     return (
       <motion.div
         ref={ref}
@@ -25,7 +41,7 @@ const GlassCard = React.forwardRef<HTMLDivElement, GlassCardProps>(
           gradient && "mesh-bg",
           className
         )}
-        {...restProps}
+        {...filteredProps}
       >
         {/* Subtle top light refraction */}
         <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-white/10 to-transparent" />
