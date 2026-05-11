@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/Button";
 import { Avatar } from "@/components/ui/Avatar";
 import { Input } from "@/components/ui/Input";
 import { AnimatedSection } from "@/components/ui/AnimatedSection";
+import { cn } from "@/lib/utils";
 import { 
   MapPin, 
   Star, 
