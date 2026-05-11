@@ -3,6 +3,7 @@ import { reviewSchema } from "@/lib/validations";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { NextResponse } from "next/server";
+import { Prisma } from "@prisma/client";
 
 export async function POST(request: Request) {
   try {
@@ -21,7 +22,7 @@ export async function POST(request: Request) {
 
     if (!buyer) return new NextResponse("Buyer not found", { status: 404 });
 
-    const review = await prisma.$transaction(async (tx) => {
+    const review = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
       const rev = await tx.review.create({
         data: {
           ...validatedData,
