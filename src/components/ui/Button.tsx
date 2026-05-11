@@ -13,6 +13,7 @@ export interface ButtonProps
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant = "primary", size = "md", isLoading, children, ...props }, ref) => {
+    const { onDrag, onDragStart, onDragEnd, onDragOver, onDragEnter, onDragLeave, onDrop, ...restProps } = props;
     const variants = {
       primary: "bg-accent text-white hover:bg-accent/90 accent-glow",
       secondary: "bg-secondary text-white hover:bg-secondary/90 secondary-glow",
@@ -41,7 +42,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
           sizes[size],
           className
         )}
-        {...props}
+        {...restProps}
       >
         {isLoading ? (
           <div className="flex items-center gap-2">

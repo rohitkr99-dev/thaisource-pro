@@ -12,6 +12,7 @@ interface GlassCardProps extends React.HTMLAttributes<HTMLDivElement> {
 
 const GlassCard = React.forwardRef<HTMLDivElement, GlassCardProps>(
   ({ className, hoverEffect = true, accent = "none", gradient = false, children, ...props }, ref) => {
+    const { onDrag, onDragStart, onDragEnd, onDragOver, onDragEnter, onDragLeave, onDrop, ...restProps } = props;
     return (
       <motion.div
         ref={ref}
@@ -24,7 +25,7 @@ const GlassCard = React.forwardRef<HTMLDivElement, GlassCardProps>(
           gradient && "mesh-bg",
           className
         )}
-        {...props}
+        {...restProps}
       >
         {/* Subtle top light refraction */}
         <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-white/10 to-transparent" />
