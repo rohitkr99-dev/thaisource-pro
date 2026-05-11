@@ -11,13 +11,20 @@ export async function GET(request: Request) {
     const categoryId = searchParams.get("categoryId");
     const status = searchParams.get("status");
 
+    if (!session) {
+      return new NextResponse("Unauthorized", { status: 401 });
+    }
+
+    const userRole = (session.user as any)?.role;
+    const userId = (session.user as any)?.id;
+
     const rfqs = await prisma.rFQ.findMany({
       where: {
         ...(categoryId && { categoryId }),
         ...(status && { status: status as any }),
         // If it's a buyer, they only see their own RFQs unless they are admin
-        ...((session?.user as any)?.role === "BUYER" && {
-          buyer: { userId: (session.user as any).id },
+        ...(userRole === "BUYER" && {
+          buyer: { userId },
         }),
       },
       include: {
