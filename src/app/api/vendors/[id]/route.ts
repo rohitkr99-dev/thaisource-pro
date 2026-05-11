@@ -6,11 +6,12 @@ import { NextResponse } from "next/server";
 
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const vendor = await prisma.vendor.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: {
         user: {
           select: {
@@ -41,15 +42,16 @@ export async function GET(
 
 export async function PUT(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);
     const body = await request.json();
     const validatedData = vendorSchema.parse(body);
+    const { id } = await params;
 
     const vendor = await prisma.vendor.findUnique({
-      where: { id: params.id },
+      where: { id },
     });
 
     if (!vendor) {
@@ -64,7 +66,7 @@ export async function PUT(
     }
 
     const updatedVendor = await prisma.vendor.update({
-      where: { id: params.id },
+      where: { id },
       data: validatedData,
     });
 
@@ -76,17 +78,18 @@ export async function PUT(
 
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);
+    const { id } = await params;
 
     if ((session?.user as any).role !== "ADMIN") {
       return new NextResponse("Unauthorized", { status: 401 });
     }
 
     await prisma.vendor.delete({
-      where: { id: params.id },
+      where: { id },
     });
 
     return new NextResponse("Deleted", { status: 200 });
