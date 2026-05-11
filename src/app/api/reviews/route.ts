@@ -3,7 +3,6 @@ import { reviewSchema } from "@/lib/validations";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { NextResponse } from "next/server";
-import { Prisma } from "@prisma/client";
 
 export async function POST(request: Request) {
   try {
@@ -22,7 +21,7 @@ export async function POST(request: Request) {
 
     if (!buyer) return new NextResponse("Buyer not found", { status: 404 });
 
-    const review = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
+    const review = await prisma.$transaction(async (tx: any) => {
       const rev = await tx.review.create({
         data: {
           ...validatedData,
@@ -35,7 +34,7 @@ export async function POST(request: Request) {
         where: { vendorId: validatedData.vendorId }
       });
 
-      const avgRating = allReviews.reduce((acc, curr) => acc + curr.rating, 0) / allReviews.length;
+      const avgRating = allReviews.reduce((acc: number, curr: any) => acc + curr.rating, 0) / allReviews.length;
 
       await tx.vendor.update({
         where: { id: validatedData.vendorId },
